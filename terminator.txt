@@ -1,5 +1,5 @@
-# Color scheme configuration for Terminator terminal emulator (http://www.tenshu.net/terminator/ and https://launchpad.net/terminator)
-# 
+     # Color scheme configuration for Terminator terminal emulator (http://www.tenshu.net/terminator/ and https://launchpad.net/terminator)
+#
 # Copy the following lines within the [profiles] section of terminator configuration file at ~/.config/terminator/config
 
 [[4bit-1510005224829]]
