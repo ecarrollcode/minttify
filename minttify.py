@@ -12,9 +12,8 @@ def getopts(argv):
         argv = argv[1:]  # Reduce the argument list by copying it starting from index 1.
     return opts
 
-def get_hex_to_rgb(line):
+def hex_to_rgb(hex_val):
     """Return red, green, blue for the given hex color."""
-    hex_val = re.search(hex_rgx, line).group(0).strip('#')
     h_len = len(hex_val)
     tupl = tuple(int(hex_val[i:i + h_len // 3], 16) for i in range(0, h_len, h_len // 3))
     final = ','.join(map(str, tupl))
@@ -27,12 +26,12 @@ def main():
     fname = args['-f']
     mintty_dict = dict()
     rgb_vals = list()
-    hex_vals = list()
+    other_thing = list()
     background = tuple()
     foreground = tuple()
     cursor = tuple()
+    final_str = str()
 
-    mintty_keys  = ["BackgroundColour", "ForegroundColour", "CursorColour"]
     palette_keys = ["Black", "BoldBlack", "Red", "BoldRed", "Green",
                     "BoldGreen", "Yellow", "BoldYellow", "Blue",
                     "BoldBlue", "Magenta", "BoldMagenta", "Cyan",
@@ -46,30 +45,34 @@ def main():
             # ignore irrelevant lines
             if len(line) == 0 or line[0] == "#" or match or "use_theme_colors" in line:
                 continue
-            hex_val = get_hex_to_rgb(line)
-            hex_vals = list()
+            hex_val = re.search(hex_rgx, line).group(0).strip('#')
+            rgb_val = hex_to_rgb(hex_val)
 
             if "background_color" in line:
-                mintty_dict["BackgroundColour"] = hex_val
+                background = ("BackgroundColour", rgb_val)
             elif "foreground_color" in line:
-                mintty_dict["ForegroundColour"] = hex_val
+                foreground = ("ForegroundColour", rgb_val)
+            elif "cursor_color" in line:
+                cursor = ("CursorColour", rgb_val)
             elif "palette" in line:
-                hex_vals = [s.strip('#') for s in  re.findall(hex_rgx, line)]
-                print hex_vals
+                rgb_vals =  [s.strip('#') for s in  re.findall(hex_rgx, line)]
+                print rgb_vals
+                # print map(hex_to_rgb, rgb_vals)
+                # print hex_to_rgb('b87a7a')
 
 
+        if not cursor:
+            cursor = ("CursorColour", background[1])
 
-
-
-            # hex_vals.insert(1, hex_vals[1])
-            # rgb_vals = map(get_hex_to_rgb, hex_vals)
-
-    mintty_tuples_list = zip(mintty_keys, rgb_vals)
+    palette_list = zip(palette_keys, rgb_vals)
+    mintty_tuples_list = [background, foreground, cursor] + palette_list
+    print mintty_tuples_list
 
     for i in range(0, len(mintty_tuples_list)):
         curr_key = mintty_tuples_list[i][0]
         curr_val = mintty_tuples_list[i][1]
-        finalStr = curr_key + "=" + curr_val
+        final_str = curr_key + "=" + curr_val
+        # print final_str
 
 
 main()
