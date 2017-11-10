@@ -1,6 +1,7 @@
 import sys
 import re
-from collections import OrderedDict
+import collections
+from functools import reduce
 
 hex_rgx = '#[0-9a-fA-F]+'
 
@@ -12,6 +13,7 @@ def getopts(argv):
         argv = argv[1:]  # Reduce the argument list by copying it starting from index 1.
     return opts
 
+
 def hex_to_rgb(hex_val):
     """Return red, green, blue for the given hex color."""
     h_len = len(hex_val)
@@ -20,22 +22,31 @@ def hex_to_rgb(hex_val):
     return final
 
 
+def merge_dicts(*dicts):
+    return reduce(lambda a, d: a.update(d) or a, dicts, {})
+
+
 def main():
     """Main parsing function"""
     args  = getopts(sys.argv)
     fname = args['-f']
-    mintty_dict = dict()
     rgb_vals = list()
-    other_thing = list()
     background = tuple()
     foreground = tuple()
     cursor = tuple()
     final_str = str()
+    colors_dict = dict()
 
-    palette_keys = ["Black", "BoldBlack", "Red", "BoldRed", "Green",
-                    "BoldGreen", "Yellow", "BoldYellow", "Blue",
-                    "BoldBlue", "Magenta", "BoldMagenta", "Cyan",
-                    "BoldCyan", "White", "BoldWhite"]          
+    mintty_keys     =  ["BackgroundColour", "ForegroundColour", "CursorColour",
+                        "Black", "BoldBlack", "Red", "BoldRed", "Green",
+                        "BoldGreen", "Yellow", "BoldYellow", "Blue",
+                        "BoldBlue", "Magenta", "BoldMagenta", "Cyan",
+                        "BoldCyan", "White", "BoldWhite"] 
+
+    terminator_keys = ["Black", "Red", "Green", "Yellow", "Blue", "Magenta",
+                        "Cyan", "White", "BoldBlack", "BoldRed", "BoldGreen",
+                        "BoldYellow", "BoldBlue", "BoldMagenta", "BoldCyan",
+                        "BoldWhite"]        
 
     with open(fname) as f:
         for line in f:
@@ -49,30 +60,27 @@ def main():
             rgb_val = hex_to_rgb(hex_val)
 
             if "background_color" in line:
-                background = ("BackgroundColour", rgb_val)
+                colors_dict["BackgroundColour"] = rgb_val
             elif "foreground_color" in line:
-                foreground = ("ForegroundColour", rgb_val)
+                colors_dict["ForegroundColour"] = rgb_val
             elif "cursor_color" in line:
-                cursor = ("CursorColour", rgb_val)
+                colors_dict["CursorColour"] = rgb_val
             elif "palette" in line:
-                rgb_vals =  [s.strip('#') for s in  re.findall(hex_rgx, line)]
-                print rgb_vals
-                # print map(hex_to_rgb, rgb_vals)
-                # print hex_to_rgb('b87a7a')
+                rgb_vals =  map(hex_to_rgb, [s.strip('#') for s in  re.findall(hex_rgx, line)])
 
+        if "CursorColour" not in colors_dict.keys():
+            colors_dict["CursorColour"] = colors_dict["ForegroundColour"]
 
-        if not cursor:
-            cursor = ("CursorColour", background[1])
-
-    palette_list = zip(palette_keys, rgb_vals)
-    mintty_tuples_list = [background, foreground, cursor] + palette_list
-    print mintty_tuples_list
-
-    for i in range(0, len(mintty_tuples_list)):
-        curr_key = mintty_tuples_list[i][0]
-        curr_val = mintty_tuples_list[i][1]
+    index_map = {v: i for i, v in enumerate(mintty_keys)}
+    rest_of_dict = dict(zip(terminator_keys, rgb_vals))
+    colors_dict = merge_dicts(colors_dict, rest_of_dict)
+    colors_tuple_list = sorted(colors_dict.items(), key=lambda pair: index_map[pair[0]])
+    for i in range(0, len(colors_tuple_list)):
+        curr_elem = colors_tuple_list[i]
+        curr_key = curr_elem[0]
+        curr_val = curr_elem[1]
         final_str = curr_key + "=" + curr_val
-        # print final_str
+        print final_str
 
 
 main()
