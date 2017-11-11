@@ -1,7 +1,7 @@
 import sys
 import re
-import collections
 from functools import reduce
+import os
 
 hex_rgx = '#[0-9a-fA-F]+'
 
@@ -75,12 +75,17 @@ def main():
     rest_of_dict = dict(zip(terminator_keys, rgb_vals))
     colors_dict = merge_dicts(colors_dict, rest_of_dict)
     colors_tuple_list = sorted(colors_dict.items(), key=lambda pair: index_map[pair[0]])
+    b_name = os.path.splitext(fname)[0]
+
+    f_out = open(b_name + ".minttyrc","w+")
+
     for i in range(0, len(colors_tuple_list)):
         curr_elem = colors_tuple_list[i]
         curr_key = curr_elem[0]
         curr_val = curr_elem[1]
-        final_str = curr_key + "=" + curr_val
-        print final_str
+        final_str = curr_key + "=" + curr_val + "\n"
+        f_out.write(final_str)
 
-
+    f_out.close()
+    
 main()
