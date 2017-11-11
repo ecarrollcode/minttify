@@ -54,7 +54,8 @@ def main():
             match = re.search('\[\[.*\]\]', line) # match profiles
 
             # ignore irrelevant lines
-            if len(line) == 0 or line[0] == "#" or match or "use_theme_colors" in line:
+            if (len(line) == 0 or line[0] == "#" or match or
+                "use_theme_colors" in line or "background_image" in line):
                 continue
             hex_val = re.search(hex_rgx, line).group(0).strip('#')
             rgb_val = hex_to_rgb(hex_val)
@@ -87,5 +88,5 @@ def main():
         f_out.write(final_str)
 
     f_out.close()
-    
+
 main()
