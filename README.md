@@ -1,6 +1,6 @@
-# minittify
+# minttify
 
-An ongoing project to easily convert color scheme config files between terminals. Currently supports conversion from [terminator](https://launchpad.net/terminator) to [mintty](https://github.com/mintty/mintty).
+An ongoing project to easily convert color theme config files between terminals. Currently supports conversion from [terminator](https://launchpad.net/terminator) to [mintty](https://github.com/mintty/mintty).
 
 ### Usage
 
