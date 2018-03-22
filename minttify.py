@@ -29,6 +29,10 @@ def merge_dicts(*dicts):
 def main():
     """Main parsing function"""
     args  = getopts(sys.argv)
+    if "-f" not in args:
+        print("\nError: no file input.")
+        print("USAGE: python minttify.py -f [terminator config file]\n")
+        return
     fname = args['-f']
     rgb_vals = list()
     background = tuple()
@@ -55,7 +59,8 @@ def main():
 
             # ignore irrelevant lines
             if (len(line) == 0 or line[0] == "#" or match or
-                "use_theme_colors" in line or "background_image" in line):
+                "use_theme_colors" in line or "background_image" in line or
+                '#' not in line):
                 continue
             hex_val = re.search(hex_rgx, line).group(0).strip('#')
             rgb_val = hex_to_rgb(hex_val)
@@ -68,6 +73,8 @@ def main():
                 colors_dict["CursorColour"] = rgb_val
             elif "palette" in line:
                 rgb_vals =  map(hex_to_rgb, [s.strip('#') for s in  re.findall(hex_rgx, line)])
+            else:
+                continue
 
         if "CursorColour" not in colors_dict.keys():
             colors_dict["CursorColour"] = colors_dict["ForegroundColour"]
